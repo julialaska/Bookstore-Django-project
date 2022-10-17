@@ -1,1 +1,2 @@
-# PSI_project
+# PSI_project 
+Bookstore management system with clients reviews 
