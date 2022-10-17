@@ -1,2 +1,2 @@
 # PSI_project 
-Bookstore management system with clients reviews 
+Project Subject: Bookstore management system with clients reviews 
