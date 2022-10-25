@@ -1,7 +1,20 @@
 from django.db import models
 
 
+class Category(models.Model):
+    title = models.CharField(max_length=45)
+    description = models.CharField(max_length=45)
+    books_amount = models.CharField(max_length=45)
+
+    class Meta:
+        ordering = ('title',)
+
+    def __str__(self):
+        return self.title
+
+
 class Book(models.Model):
+    category = models.ForeignKey(Category, related_name='books', on_delete=models.CASCADE)
     author = models.CharField(max_length=45)
     title = models.CharField(max_length=45)
     price = models.CharField(max_length=45)
@@ -30,28 +43,54 @@ class Client(models.Model):
         ordering = ('surname',)
 
     def __str__(self):
-        return self.first_name+' '+self.surname
+        return self.first_name + ' ' + self.surname
 
 
 class Delivery(models.Model):
-    price = models.CharField(45)
-    type = models.CharField(45)
-    priority = models.BooleanField()
-    time = models.CharField(45)
+    price = models.CharField(max_length=45)
+    type = models.CharField(max_length=45)
+    # priority = models.BooleanField()
+    time = models.CharField(max_length=45)
+    TRUE = 'T'
+    FALSE = 'F'
+    PRIORITY_CHOICES = ((TRUE, 'True'), (FALSE, 'False'),)
+    priority = models.CharField(max_length=2, choices=PRIORITY_CHOICES, default=FALSE)
+
+    class Meta:
+        ordering = ('priority',)
+
+    def __str__(self):
+        return self.priority
 
 
 class Order(models.Model):
     client = models.ForeignKey(Client, related_name='orders', on_delete=models.CASCADE)
-    delivery = models.ForeignKey(Delivery, related_name='delivers', on_delete=models.CASCADE)
-    quantity = models.CharField(45)
-    price = models.CharField(45)
-    address = models.CharField(45)
-    phone = models.CharField(45)
+    delivery = models.ForeignKey(Delivery, related_name='orders', on_delete=models.CASCADE)
+    quantity = models.CharField(max_length=45)
+    price = models.CharField(max_length=45)
+    address = models.CharField(max_length=45)
+    phone = models.CharField(max_length=45)
     date = models.DateField()
-    status = models.CharField(45)
+    status = models.CharField(max_length=45)
+
+    class Meta:
+        ordering = ('date',)
+
+    def __str__(self):
+        return self.date
 
 
 class BookHasOrder(models.Model):
-    book = models.ForeignKey(Book, related_name='books', on_delete=models.CASCADE)
-    order = models.ForeignKey(Order, related_name='orders', on_delete=models.CASCADE)
+    book = models.ForeignKey(Book, related_name='bookhasorders', on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, related_name='bookhasorders', on_delete=models.CASCADE)
 
+
+class Review(models.Model):
+    book = models.ForeignKey(Book, related_name='reviews', on_delete=models.CASCADE)
+    client = models.ForeignKey(Client, related_name='reviews', on_delete=models.CASCADE)
+    scale_points = models.CharField(max_length=45)
+    read_date = models.DateField()
+    advantages = models.CharField(max_length=45)
+    disadvantages = models.CharField(max_length=45)
+    recommend = models.BooleanField()
+    read_again = models.BooleanField()
