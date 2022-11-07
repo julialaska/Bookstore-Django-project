@@ -1,8 +1,8 @@
 from rest_framework import serializers
-from .models import Order, Book, Category, Client, Delivery, Review
+from .models import Order, Book, Category, Client, Delivery, Review, BookHasOrder
 
 
-class CategorySerializer(serializers.Serializer):
+class CategorySerializer(serializers.ModelSerializer):
     books = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='book-category')
     title = serializers.CharField(max_length=45)
     description = serializers.CharField(max_length=45)
@@ -12,16 +12,19 @@ class CategorySerializer(serializers.Serializer):
         model = Category
         fields = ['pk', 'url', 'title', 'description', 'books_amount', 'books']
 
-    def update(self, instance, validated_data):
-        pass
-
     def create(self, validated_data):
-        pass
+        return Category(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.title = validated_data.get('title', instance.title)
+        instance.description = validated_data.get('description', instance.description)
+        instance.books_amount = validated_data.get('books_amount', instance.books_amount)
+        return instance
 
 
-class BookSerializer(serializers.Serializer):
+class BookSerializer(serializers.ModelSerializer):
     book_category = serializers.SlugRelatedField(queryset=Category.objects.all(), slug_field='name')
-    orders = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='order')
+    # orders = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='order')
     author = serializers.CharField(max_length=45)
     title = serializers.CharField(max_length=45)
     price = serializers.CharField(max_length=45)
@@ -41,17 +44,21 @@ class BookSerializer(serializers.Serializer):
 
     class Meta:
         model = Book
-        fields = ['url', 'book_category', 'orders', 'author', 'title', 'price', 'amount', 'description', 'page_amount',
-                  'orders']
-
-    def update(self, instance, validated_data):
-        pass
+        fields = ['url', 'book_category', 'orders', 'author', 'title', 'price', 'amount', 'description', 'page_amount']
 
     def create(self, validated_data):
-        pass
+        return Book(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.author = validated_data.get('author', instance.author)
+        instance.title = validated_data.get('title', instance.title)
+        instance.price = validated_data.get('price', instance.price)
+        instance.amount = validated_data.get('amount', instance.amount)
+        instance.description = validated_data.get('description', instance.description)
+        return instance
 
 
-class ClientSerializer(serializers.Serializer):
+class ClientSerializer(serializers.ModelSerializer):
     book_reviews = serializers.SlugRelatedField(queryset=Review.objects.all(), slug_field='review')
     orders = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='order')
     first_name = serializers.CharField(max_length=45)
@@ -73,15 +80,23 @@ class ClientSerializer(serializers.Serializer):
         fields = ['url', 'pk', 'book_reviews', 'first_name', 'surname', 'birthdate', 'address', 'phone_number',
                   'bank_account', 'email', 'password', 'orders']
 
-    def update(self, instance, validated_data):
-        pass
-
     def create(self, validated_data):
-        pass
+        return Client(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.first_name = validated_data.get('first_name', instance.first_name)
+        instance.surname = validated_data.get('surname', instance.surname)
+        instance.birthdate = validated_data.get('birthdate', instance.birthdate)
+        instance.address = validated_data.get('address', instance.address)
+        instance.phone_number = validated_data.get('phone_number', instance.phone_number)
+        instance.bank_account = validated_data.get('bank_account', instance.bank_account)
+        instance.email = validated_data.get('email', instance.email)
+        instance.password = validated_data.get('password', instance.password)
+        return instance
 
 
-class DeliverySerializer(serializers.Serializer):
-    orders = serializers.SlugRelatedField(queryset=Order.objects.all(), slug_field='orders')
+class DeliverySerializer(serializers.ModelSerializer):
+    # orders = serializers.SlugRelatedField(queryset=Order.objects.all(), slug_field='orders')
     price = serializers.CharField(max_length=45)
     type = serializers.CharField(max_length=45)
     time = serializers.CharField(max_length=45)
@@ -94,16 +109,21 @@ class DeliverySerializer(serializers.Serializer):
 
     class Meta:
         model = Delivery
-        fields = ['url', 'pk', 'price', 'type', 'time', 'priority', 'orders']
-
-    def update(self, instance, validated_data):
-        pass
+        fields = ['url', 'pk', 'price', 'type', 'time', 'priority']
+        # fields = ['url', 'pk', 'price', 'type', 'time', 'priority', 'orders']
 
     def create(self, validated_data):
-        pass
+        return Delivery(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.price = validated_data.get('price', instance.price)
+        instance.type = validated_data.get('type', instance.type)
+        instance.time = validated_data.get('time', instance.time)
+        instance.priority = validated_data.get('priority', instance.priority)
+        return instance
 
 
-class OrderSerializer(serializers.Serializer):
+class OrderSerializer(serializers.ModelSerializer):
     client = serializers.SlugRelatedField(queryset=Client.objects.all(), slug_field='client')
     delivery = serializers.SlugRelatedField(queryset=Delivery.objects.all(), slug_field='delivery')
     quantity = serializers.CharField(max_length=45)
@@ -124,17 +144,23 @@ class OrderSerializer(serializers.Serializer):
         return value
 
     class Meta:
-        model = Delivery
+        model = Order
         fields = ['url', 'pk', 'client', 'delivery', 'quantity', 'price', 'address', 'phone', 'date', 'status']
 
-    def update(self, instance, validated_data):
-        pass
-
     def create(self, validated_data):
-        pass
+        return Order(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.quantity = validated_data.get('quantity', instance.quantity)
+        instance.price = validated_data.get('price', instance.price)
+        instance.address = validated_data.get('address', instance.address)
+        instance.phone = validated_data.get('phone', instance.phone)
+        instance.date = validated_data.get('date', instance.date)
+        instance.status = validated_data.get('status', instance.status)
+        return instance
 
 
-class ReviewSerializer(serializers.Serializer):
+class ReviewSerializer(serializers.ModelSerializer):
     books = serializers.SlugRelatedField(queryset=Book.objects.all(), slug_field='books')
     client = serializers.SlugRelatedField(queryset=Client.objects.all(), slug_field='client')
     scale_points = serializers.CharField(max_length=45)
@@ -144,10 +170,29 @@ class ReviewSerializer(serializers.Serializer):
     recommend = serializers.BooleanField()
     read_again = serializers.BooleanField()
 
-    def update(self, instance, validated_data):
-        pass
+    class Meta:
+        model = Review
+        fields = ['url', 'pk', 'books', 'client', 'scale_points', 'read_date', 'advantages', 'disadvantages',
+                  'recommend', 'read_again']
 
     def create(self, validated_data):
-        pass
+        return Review(**validated_data)
 
+    def update(self, instance, validated_data):
+        instance.scale_points = validated_data.get('scale_points', instance.scale_points)
+        instance.read_date = validated_data.get('read_date', instance.read_date)
+        instance.advantages = validated_data.get('advantages', instance.advantages)
+        instance.disadvantages = validated_data.get('disadvantages', instance.disadvantages)
+        instance.recommend = validated_data.get('recommend', instance.recommend)
+        instance.read_again = validated_data.get('read_again', instance.read_again)
+        return instance
+
+
+class BookHasOrderSerializer(serializers.ModelSerializer):
+    books = serializers.SlugRelatedField(queryset=Book.objects.all(), slug_field='books')
+    orders = serializers.SlugRelatedField(queryset=Order.objects.all(), slug_field='orders')
+
+    class Meta:
+        model = BookHasOrder
+        fields = ['books', 'orders']
 
