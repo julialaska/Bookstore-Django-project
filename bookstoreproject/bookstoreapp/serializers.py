@@ -196,3 +196,11 @@ class BookHasOrderSerializer(serializers.ModelSerializer):
         model = BookHasOrder
         fields = ['books', 'orders']
 
+    def create(self, validated_data):
+        return BookHasOrder(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.books = validated_data.get('books', instance.books)
+        instance.orders = validated_data.get('orders', instance.orders)
+        return instance
+
