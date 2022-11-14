@@ -2,8 +2,9 @@ from django.http import HttpResponse, Http404
 from rest_framework import generics, status
 from rest_framework.reverse import reverse
 from rest_framework.response import Response
-from .models import Book, Category, Client, Order
-from .serializers import CategorySerializer, BookSerializer, OrderSerializer, ClientSerializer
+from .models import Book, Category, Client, Order, Delivery, Review
+from .serializers import CategorySerializer, BookSerializer, \
+    OrderSerializer, ClientSerializer, DeliverySerializer, ReviewSerializer
 # from django_filters import AllValuesFilter, DateTimeFilter, NumberFilter, FilterSet
 from rest_framework import permissions
 from django.contrib.auth.models import User
@@ -37,20 +38,8 @@ class BookList(generics.ListCreateAPIView):
     ordering_fields = ['title', 'category', 'author', 'price']
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
-    # def perform_create(self, serializer):
-        # serializer.save(owner=self.request.user)
-
-    # def get(self, request, format=None):
-    #     books = Book.objects.all()
-    #     serializer = BookSerializer(books, many=True)
-    #     return Response(serializer.data)
-    #
-    # def post(self, request, format=None):
-    #     serializer = BookSerializer(data=request.data)
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
 
 class BookDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -59,27 +48,53 @@ class BookDetail(generics.RetrieveUpdateDestroyAPIView):
     name = 'book-detail'
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
-    # def get_object(self, pk):
-    #     try:
-    #         return Book.objects.get(pk=pk)
-    #     except Book.DoesNotExist:
-    #         raise Http404
-    #
-    # def get(self, request, pk, format=None):
-    #     book = self.get_object(pk)
-    #     serializer = BookSerializer(book)
-    #     return Response(serializer.data)
-    #
-    # def put(self, request, pk, format=None):
-    #     book = self.get_object(pk)
-    #     serializer = BookSerializer(book, data=request.data)
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response(serializer.data)
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    #
-    # def delete(self, request, pk, format=None):
-    #     book = self.get_object(pk)
-    #     book.delete()
-    #     return Response(status=status.HTTP_204_NO_CONTENT)
-    #
+
+class ClientList(generics.ListCreateAPIView):
+    queryset = Client.objects.all()
+    serializer_class = ClientSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    name = 'client-list'
+    ordering_fields = ['surname', 'birthdate']
+
+
+class ClientDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Client.objects.all()
+    serializer_class = ClientSerializer
+    name = 'client-detail'
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+
+class OrderList(generics.ListCreateAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    name = 'order-list'
+
+
+class OrderDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    name = 'order-detail'
+
+
+class DeliveryList(generics.ListCreateAPIView):
+    queryset = Delivery.objects.all()
+    serializer_class = DeliverySerializer
+    name = 'delivery-list'
+
+
+class DeliveryDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Delivery.objects.all()
+    serializer_class = DeliverySerializer
+    name = 'delivery-detail'
+
+
+class ReviewList(generics.ListCreateAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    name = 'review-list'
+
+
+class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    name = 'review-detail'

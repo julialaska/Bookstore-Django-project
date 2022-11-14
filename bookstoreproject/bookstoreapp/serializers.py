@@ -59,7 +59,6 @@ class BookSerializer(serializers.ModelSerializer):
 
 
 class ClientSerializer(serializers.ModelSerializer):
-    book_reviews = serializers.SlugRelatedField(queryset=Review.objects.all(), slug_field='review')
     orders = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='order')
     first_name = serializers.CharField(max_length=45)
     surname = serializers.CharField(max_length=45)
@@ -77,7 +76,7 @@ class ClientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Client
-        fields = ['url', 'pk', 'book_reviews', 'first_name', 'surname', 'birthdate', 'address', 'phone_number',
+        fields = ['url', 'pk', 'first_name', 'surname', 'birthdate', 'address', 'phone_number',
                   'bank_account', 'email', 'password', 'orders']
 
     def create(self, validated_data):
