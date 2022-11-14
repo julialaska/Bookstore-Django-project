@@ -44,7 +44,7 @@ class BookSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Book
-        fields = ['url', 'book_category', 'orders', 'author', 'title', 'price', 'amount', 'description', 'page_amount']
+        fields = ['url', 'book_category', 'author', 'title', 'price', 'amount', 'description', 'page_amount']
 
     def create(self, validated_data):
         return Book(**validated_data)
