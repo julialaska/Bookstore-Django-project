@@ -66,7 +66,6 @@ class Delivery(models.Model):
 class Order(models.Model):
     client = models.ForeignKey(Client, related_name='orders', on_delete=models.CASCADE)
     delivery = models.ForeignKey(Delivery, related_name='orders', on_delete=models.CASCADE)
-    # book = models.ForeignKey(Book, related_name='orders', on_delete=models.CASCADE)
     quantity = models.CharField(max_length=45)
     price = models.CharField(max_length=45)
     address = models.CharField(max_length=45)
@@ -78,7 +77,7 @@ class Order(models.Model):
         ordering = ('client',)
 
     def __str__(self):
-        return self.client.surname
+        return self.client
 
 
 class BookHasOrder(models.Model):

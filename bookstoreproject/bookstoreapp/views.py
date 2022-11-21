@@ -32,7 +32,7 @@ class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
 class BookList(generics.ListCreateAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    name = 'books'
+    name = 'book-list'
     filter_fields = ['title', 'category', 'price', 'author']
     search_fields = ['title', 'author']
     ordering_fields = ['title', 'category', 'author', 'price']
