@@ -12,9 +12,6 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = ['pk', 'url', 'title', 'description', 'books_amount', 'books']
 
-    def create(self, validated_data):
-        return Category(**validated_data)
-
     def update(self, instance, validated_data):
         instance.title = validated_data.get('title', instance.title)
         instance.description = validated_data.get('description', instance.description)
@@ -23,17 +20,17 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class BookSerializer(serializers.ModelSerializer):
-    book_category = serializers.SlugRelatedField(queryset=Category.objects.all(), slug_field='name')
+    category = serializers.SlugRelatedField(queryset=Category.objects.all(), slug_field='title')
     # orders = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='order')
     author = serializers.CharField(max_length=45)
     title = serializers.CharField(max_length=45)
-    price = serializers.CharField(max_length=45)
+    price = serializers.IntegerField
     amount = serializers.CharField(max_length=45)
     description = serializers.CharField(max_length=45)
     page_amount = serializers.CharField(max_length=45)
 
     def validate_price(self, price):
-        if price <= 0:
+        if price <= '0':
             raise serializers.ValidationError("Prices can't be lower or equal to zero", )
         return price
 
@@ -44,10 +41,7 @@ class BookSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Book
-        fields = ['url', 'book_category', 'author', 'title', 'price', 'amount', 'description', 'page_amount']
-
-    def create(self, validated_data):
-        return Book(**validated_data)
+        fields = ['url', 'category', 'author', 'title', 'price', 'amount', 'description', 'page_amount']
 
     def update(self, instance, validated_data):
         instance.author = validated_data.get('author', instance.author)
@@ -69,18 +63,15 @@ class ClientSerializer(serializers.ModelSerializer):
     email = serializers.CharField(max_length=45)
     password = serializers.CharField(max_length=45)
 
-    def validate_phone_number(self, value):
-        if value != 9:
-            raise serializers.ValidationError("Phone number have to consist of 9 digits", )
-        return value
+    # def validate_phone_number(self, value):
+    #     if value != '9':
+    #         raise serializers.ValidationError("Phone number have to consist of 9 digits", )
+    #     return value
 
     class Meta:
         model = Client
         fields = ['url', 'pk', 'first_name', 'surname', 'birthdate', 'address', 'phone_number',
                   'bank_account', 'email', 'password', 'orders']
-
-    def create(self, validated_data):
-        return Client(**validated_data)
 
     def update(self, instance, validated_data):
         instance.first_name = validated_data.get('first_name', instance.first_name)
@@ -102,7 +93,7 @@ class DeliverySerializer(serializers.ModelSerializer):
     priority = serializers.ChoiceField(choices=Delivery.PRIORITY_CHOICES)
 
     def validate_price(self, price):
-        if price <= 0:
+        if int(price) <= 0:
             raise serializers.ValidationError("Prices can't be lower or equal to zero", )
         return price
 
@@ -110,9 +101,6 @@ class DeliverySerializer(serializers.ModelSerializer):
         model = Delivery
         fields = ['url', 'pk', 'price', 'type', 'time', 'priority']
         # fields = ['url', 'pk', 'price', 'type', 'time', 'priority', 'orders']
-
-    def create(self, validated_data):
-        return Delivery(**validated_data)
 
     def update(self, instance, validated_data):
         instance.price = validated_data.get('price', instance.price)
@@ -123,8 +111,9 @@ class DeliverySerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    client = serializers.SlugRelatedField(queryset=Client.objects.all(), slug_field='client')
-    delivery = serializers.SlugRelatedField(queryset=Delivery.objects.all(), slug_field='delivery')
+    client = serializers.SlugRelatedField(queryset=Client.objects.all(), slug_field='surname')
+    delivery = serializers.SlugRelatedField(queryset=Delivery.objects.all(), slug_field='pk')
+    # book = serializers.SlugRelatedField(queryset=Book.objects.all(), slug_field='title')
     quantity = serializers.CharField(max_length=45)
     price = serializers.CharField(max_length=45)
     address = serializers.CharField(max_length=45)
@@ -133,21 +122,18 @@ class OrderSerializer(serializers.ModelSerializer):
     status = serializers.CharField(max_length=45)
 
     def validate_price(self, price):
-        if price <= 0:
+        if price <= '0':
             raise serializers.ValidationError("Prices can't be lower or equal to zero", )
         return price
 
     def validate_phone_number(self, value):
-        if value != 9:
+        if int(value) != 9:
             raise serializers.ValidationError("Phone number have to consist of 9 digits", )
         return value
 
     class Meta:
         model = Order
         fields = ['url', 'pk', 'client', 'delivery', 'quantity', 'price', 'address', 'phone', 'date', 'status']
-
-    def create(self, validated_data):
-        return Order(**validated_data)
 
     def update(self, instance, validated_data):
         instance.quantity = validated_data.get('quantity', instance.quantity)
@@ -174,9 +160,6 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = ['url', 'pk', 'books', 'client', 'scale_points', 'read_date', 'advantages', 'disadvantages',
                   'recommend', 'read_again']
 
-    def create(self, validated_data):
-        return Review(**validated_data)
-
     def update(self, instance, validated_data):
         instance.scale_points = validated_data.get('scale_points', instance.scale_points)
         instance.read_date = validated_data.get('read_date', instance.read_date)
@@ -188,15 +171,12 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class BookHasOrderSerializer(serializers.ModelSerializer):
-    books = serializers.SlugRelatedField(queryset=Book.objects.all(), slug_field='books')
-    orders = serializers.SlugRelatedField(queryset=Order.objects.all(), slug_field='orders')
+    books = serializers.SlugRelatedField(queryset=Book.objects.all(), slug_field='title')
+    orders = serializers.SlugRelatedField(queryset=Order.objects.all(), slug_field='client')
 
     class Meta:
         model = BookHasOrder
         fields = ['books', 'orders']
-
-    def create(self, validated_data):
-        return BookHasOrder(**validated_data)
 
     def update(self, instance, validated_data):
         instance.books = validated_data.get('books', instance.books)

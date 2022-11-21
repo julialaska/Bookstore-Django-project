@@ -60,12 +60,13 @@ class Delivery(models.Model):
         ordering = ('priority',)
 
     def __str__(self):
-        return self.priority
+        return self.type
 
 
 class Order(models.Model):
     client = models.ForeignKey(Client, related_name='orders', on_delete=models.CASCADE)
     delivery = models.ForeignKey(Delivery, related_name='orders', on_delete=models.CASCADE)
+    # book = models.ForeignKey(Book, related_name='orders', on_delete=models.CASCADE)
     quantity = models.CharField(max_length=45)
     price = models.CharField(max_length=45)
     address = models.CharField(max_length=45)
@@ -74,10 +75,10 @@ class Order(models.Model):
     status = models.CharField(max_length=45)
 
     class Meta:
-        ordering = ('date',)
+        ordering = ('client',)
 
     def __str__(self):
-        return self.date
+        return self.client.surname
 
 
 class BookHasOrder(models.Model):

@@ -16,4 +16,6 @@ urlpatterns = [
     path('delivery/<int:pk>', views.DeliveryDetail.as_view(), name=views.DeliveryDetail.name),
     path('review', views.ReviewList.as_view(), name=views.ReviewList.name),
     path('review/<int:pk>', views.ReviewDetail.as_view(), name=views.ReviewDetail.name),
+    path('book_has_order', views.BookHasOrderList.as_view(), name=views.BookHasOrderList.name),
+    path('book_has_order/<int:pk>', views.BookHasOrderDetail.as_view(), name=views.BookHasOrderDetail.name),
 ]

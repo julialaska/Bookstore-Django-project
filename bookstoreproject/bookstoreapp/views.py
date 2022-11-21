@@ -2,9 +2,9 @@ from django.http import HttpResponse, Http404
 from rest_framework import generics, status
 from rest_framework.reverse import reverse
 from rest_framework.response import Response
-from .models import Book, Category, Client, Order, Delivery, Review
+from .models import Book, Category, Client, Order, Delivery, Review, BookHasOrder
 from .serializers import CategorySerializer, BookSerializer, \
-    OrderSerializer, ClientSerializer, DeliverySerializer, ReviewSerializer
+    OrderSerializer, ClientSerializer, DeliverySerializer, ReviewSerializer, BookHasOrderSerializer
 # from django_filters import AllValuesFilter, DateTimeFilter, NumberFilter, FilterSet
 from rest_framework import permissions
 from django.contrib.auth.models import User
@@ -37,9 +37,6 @@ class BookList(generics.ListCreateAPIView):
     search_fields = ['title', 'author']
     ordering_fields = ['title', 'category', 'author', 'price']
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
-
-    def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
 
 
 class BookDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -98,3 +95,15 @@ class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     name = 'review-detail'
+
+
+class BookHasOrderList(generics.ListCreateAPIView):
+    queryset = BookHasOrder.objects.all()
+    serializer_class = BookHasOrderSerializer
+    name = 'book-has-order-list'
+
+
+class BookHasOrderDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BookHasOrder.objects.all()
+    serializer_class = BookHasOrderSerializer
+    name = 'book-has-order-detail'
