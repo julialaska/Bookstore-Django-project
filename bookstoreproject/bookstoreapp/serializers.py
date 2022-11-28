@@ -3,7 +3,7 @@ from .models import Order, Book, Category, Client, Delivery, Review, BookHasOrde
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    books = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='book-category')
+    books = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='category-detail')
     title = serializers.CharField(max_length=45)
     description = serializers.CharField(max_length=45)
     books_amount = serializers.CharField(max_length=45)
@@ -21,7 +21,6 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class BookSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(queryset=Category.objects.all(), slug_field='title')
-    # orders = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='order')
     author = serializers.CharField(max_length=45)
     title = serializers.CharField(max_length=45)
     price = serializers.IntegerField
@@ -53,7 +52,8 @@ class BookSerializer(serializers.ModelSerializer):
 
 
 class ClientSerializer(serializers.ModelSerializer):
-    orders = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='order')
+    orders = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='order-detail')
+    # orders = serializers.SlugRelatedField(queryset=Order.objects.all(), slug_field='orders')
     first_name = serializers.CharField(max_length=45)
     surname = serializers.CharField(max_length=45)
     birthdate = serializers.DateField()
@@ -63,10 +63,10 @@ class ClientSerializer(serializers.ModelSerializer):
     email = serializers.CharField(max_length=45)
     password = serializers.CharField(max_length=45)
 
-    # def validate_phone_number(self, value):
-    #     if value != '9':
-    #         raise serializers.ValidationError("Phone number have to consist of 9 digits", )
-    #     return value
+    def validate_phone_number(self, value):
+        if value != '9':
+            raise serializers.ValidationError("Phone number have to consist of 9 digits", )
+        return value
 
     class Meta:
         model = Client
