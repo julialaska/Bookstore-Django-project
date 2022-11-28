@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Order, Book, Category, Client, Delivery, Review, BookHasOrder
+from django.contrib.auth.models import User
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -27,6 +28,7 @@ class BookSerializer(serializers.ModelSerializer):
     amount = serializers.CharField(max_length=45)
     description = serializers.CharField(max_length=45)
     page_amount = serializers.CharField(max_length=45)
+    owner = serializers.ReadOnlyField(source='owner.username')
 
     def validate_price(self, price):
         if price <= '0':
@@ -183,3 +185,16 @@ class BookHasOrderSerializer(serializers.ModelSerializer):
         instance.orders = validated_data.get('orders', instance.orders)
         return instance
 
+
+class UserBookSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Book
+        fields = ['url', 'title']
+
+
+class UserSerializer(serializers.HyperlinkedModelSerializer):
+    books = UserBookSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = User
+        fields = ['url', 'pk', 'username', 'book']

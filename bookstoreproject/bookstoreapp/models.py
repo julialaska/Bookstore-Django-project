@@ -21,6 +21,7 @@ class Book(models.Model):
     amount = models.CharField(max_length=45)
     description = models.CharField(max_length=45)
     page_amount = models.CharField(max_length=45)
+    owner = models.ForeignKey('auth.User', related_name='books', on_delete=models.CASCADE)
 
     class Meta:
         ordering = ('title',)
