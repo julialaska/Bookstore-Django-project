@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from .models import Book, Category, Client, Order, Delivery, Review, BookHasOrder
 from .serializers import CategorySerializer, BookSerializer, \
     OrderSerializer, ClientSerializer, DeliverySerializer, ReviewSerializer, BookHasOrderSerializer
-# from django_filters import AllValuesFilter, DateTimeFilter, NumberFilter, FilterSet
+from django_filters import AllValuesFilter, DateTimeFilter, NumberFilter, FilterSet
 from rest_framework import permissions
 from django.contrib.auth.models import User
 
@@ -46,11 +46,21 @@ class BookDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
+class ClientFilter(FilterSet):
+    from_birthdate = DateTimeFilter(field_name='birthdate', lookup_expr='gte')
+    to_birthdate = DateTimeFilter(field_name='birthdate', lookup_expr='lte')
+
+    class Meta:
+        model = Client
+        fields = ['from_birthdate', 'to_birthdate']
+
+
 class ClientList(generics.ListCreateAPIView):
     queryset = Client.objects.all()
     serializer_class = ClientSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     name = 'client-list'
+    filter_class = ClientFilter
     ordering_fields = ['surname', 'birthdate']
 
 
@@ -61,10 +71,22 @@ class ClientDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
+class OrderFilter(FilterSet):
+    min_price = NumberFilter(field_name='price', lookup_expr='gte')
+    max_price = NumberFilter(field_name='price', lookup_expr='lte')
+    client_name = AllValuesFilter(field_name='client__surname')
+
+    class Meta:
+        model = Order
+        fields = ['min_price', 'max_price', 'client_name']
+
+
 class OrderList(generics.ListCreateAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     name = 'order-list'
+    ordering_fields = ['client', 'delivery', 'quantity', 'price', 'status']
+    filter_class = OrderFilter
 
 
 class OrderDetail(generics.RetrieveUpdateDestroyAPIView):
