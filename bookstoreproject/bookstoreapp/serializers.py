@@ -42,7 +42,7 @@ class BookSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Book
-        fields = ['url', 'category', 'author', 'title', 'price', 'amount', 'description', 'page_amount']
+        fields = ['url', 'category', 'author', 'title', 'price', 'amount', 'description', 'page_amount','owner']
 
     def update(self, instance, validated_data):
         instance.author = validated_data.get('author', instance.author)
