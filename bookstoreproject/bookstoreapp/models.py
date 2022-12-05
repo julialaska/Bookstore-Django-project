@@ -78,7 +78,7 @@ class Order(models.Model):
         ordering = ('client',)
 
     def __str__(self):
-        return self.client
+        return self.client.surname
 
 
 class BookHasOrder(models.Model):

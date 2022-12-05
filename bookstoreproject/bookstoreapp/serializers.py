@@ -55,7 +55,6 @@ class BookSerializer(serializers.ModelSerializer):
 
 class ClientSerializer(serializers.ModelSerializer):
     orders = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='order-detail')
-    # orders = serializers.SlugRelatedField(queryset=Order.objects.all(), slug_field='orders')
     first_name = serializers.CharField(max_length=45)
     surname = serializers.CharField(max_length=45)
     birthdate = serializers.DateField()
@@ -102,7 +101,6 @@ class DeliverySerializer(serializers.ModelSerializer):
     class Meta:
         model = Delivery
         fields = ['url', 'pk', 'price', 'type', 'time', 'priority']
-        # fields = ['url', 'pk', 'price', 'type', 'time', 'priority', 'orders']
 
     def update(self, instance, validated_data):
         instance.price = validated_data.get('price', instance.price)
@@ -148,8 +146,8 @@ class OrderSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    books = serializers.SlugRelatedField(queryset=Book.objects.all(), slug_field='books')
-    client = serializers.SlugRelatedField(queryset=Client.objects.all(), slug_field='client')
+    book = serializers.SlugRelatedField(queryset=Book.objects.all(), slug_field='title')
+    client = serializers.SlugRelatedField(queryset=Client.objects.all(), slug_field='surname')
     scale_points = serializers.CharField(max_length=45)
     read_date = serializers.DateField()
     advantages = serializers.CharField(max_length=45)
@@ -159,7 +157,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        fields = ['url', 'pk', 'books', 'client', 'scale_points', 'read_date', 'advantages', 'disadvantages',
+        fields = ['url', 'pk', 'book', 'client', 'scale_points', 'read_date', 'advantages', 'disadvantages',
                   'recommend', 'read_again']
 
     def update(self, instance, validated_data):

@@ -1,3 +1,4 @@
+import django_filters
 from django.http import HttpResponse, Http404
 from rest_framework import generics, status
 from rest_framework.reverse import reverse
@@ -18,7 +19,7 @@ class CategoryList(generics.ListCreateAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     name = 'category-list'
-    filterset_fields = ['title']
+    filter_fields = ['title']
     search_fields = ['title']
     ordering_fields = ['title']
 
@@ -46,13 +47,13 @@ class BookDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
-class ClientFilter(FilterSet):
+class ClientFilter(django_filters.FilterSet):
     from_birthdate = DateTimeFilter(field_name='birthdate', lookup_expr='gte')
     to_birthdate = DateTimeFilter(field_name='birthdate', lookup_expr='lte')
 
     class Meta:
         model = Client
-        fields = ['from_birthdate', 'to_birthdate']
+        fields = ['from_birthdate', 'to_birthdate', 'surname']
 
 
 class ClientList(generics.ListCreateAPIView):
@@ -60,8 +61,9 @@ class ClientList(generics.ListCreateAPIView):
     serializer_class = ClientSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     name = 'client-list'
-    filter_class = ClientFilter
+    filterset_class = ClientFilter
     ordering_fields = ['surname', 'birthdate']
+    search_fields = ['surname']
 
 
 class ClientDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -78,7 +80,7 @@ class OrderFilter(FilterSet):
 
     class Meta:
         model = Order
-        fields = ['min_price', 'max_price', 'client_name']
+        fields = ['min_price', 'max_price', 'client_name', 'delivery']
 
 
 class OrderList(generics.ListCreateAPIView):
@@ -86,7 +88,8 @@ class OrderList(generics.ListCreateAPIView):
     serializer_class = OrderSerializer
     name = 'order-list'
     ordering_fields = ['client', 'delivery', 'quantity', 'price', 'status']
-    filter_class = OrderFilter
+    filterset_class = OrderFilter
+    search_fields = ['client', 'delivery', 'quantity', 'price', 'status']
 
 
 class OrderDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -129,3 +132,16 @@ class BookHasOrderDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = BookHasOrder.objects.all()
     serializer_class = BookHasOrderSerializer
     name = 'book-has-order-detail'
+
+
+class ApiRoot(generics.GenericAPIView):
+    name = 'api-root'
+
+    def get(self, request, *args, **kwargs):
+        return Response({'categories': reverse(CategoryList.name, request=request),
+                         'books': reverse(BookList.name, request=request),
+                         'clients': reverse(ClientList.name, request=request),
+                         'orders': reverse(OrderList.name, request=request),
+                         'deliveries': reverse(DeliveryList.name, request=request),
+                         'reviews': reverse(ReviewList.name, request=request),
+                         })
