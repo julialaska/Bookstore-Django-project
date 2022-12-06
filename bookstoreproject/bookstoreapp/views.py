@@ -166,7 +166,7 @@ class BookHasOrderFilter(django_filters.FilterSet):
 
     class Meta:
         model = BookHasOrder
-        fields = ['book']
+        fields = ['book', 'order']
 
 
 class BookHasOrderList(generics.ListCreateAPIView):
@@ -174,8 +174,8 @@ class BookHasOrderList(generics.ListCreateAPIView):
     serializer_class = BookHasOrderSerializer
     name = 'book-has-order-list'
     filterset_class = BookHasOrderFilter
-    search_fields = ['book']
-    ordering_fields = ['book']
+    search_fields = ['book', 'order']
+    ordering_fields = ['book', 'order']
 
 
 class BookHasOrderDetail(generics.RetrieveUpdateDestroyAPIView):

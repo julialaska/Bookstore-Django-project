@@ -8,4 +8,5 @@ admin.site.register(Client)
 admin.site.register(Order)
 admin.site.register(Delivery)
 admin.site.register(Review)
+admin.site.register(BookHasOrder)
 
