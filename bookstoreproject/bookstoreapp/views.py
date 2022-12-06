@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from .models import Book, Category, Client, Order, Delivery, Review, BookHasOrder
 from .serializers import CategorySerializer, BookSerializer, \
     OrderSerializer, ClientSerializer, DeliverySerializer, ReviewSerializer, BookHasOrderSerializer
-from django_filters import AllValuesFilter, DateTimeFilter, NumberFilter, FilterSet
+from django_filters import AllValuesFilter, DateTimeFilter, NumberFilter, FilterSet, CharFilter
 from rest_framework import permissions
 from django.contrib.auth.models import User
 
@@ -30,11 +30,22 @@ class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
     name = 'category-detail'
 
 
+class BookFilter(django_filters.FilterSet):
+    from_price = CharFilter(field_name='price', lookup_expr='gte')
+    to_price = CharFilter(field_name='price', lookup_expr='lte')
+    from_page_amount = CharFilter(field_name='page_amount', lookup_expr='gte')
+    to_page_amount = CharFilter(field_name='page_amount', lookup_expr='lte')
+
+    class Meta:
+        model = Book
+        fields = ['from_price', 'to_price', 'from_page_amount', 'to_page_amount', 'title', 'category', 'author']
+
+
 class BookList(generics.ListCreateAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     name = 'book-list'
-    filter_fields = ['title', 'category', 'price', 'author']
+    filterset_class = BookFilter
     search_fields = ['title', 'author']
     ordering_fields = ['title', 'category', 'author', 'price']
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
@@ -98,10 +109,24 @@ class OrderDetail(generics.RetrieveUpdateDestroyAPIView):
     name = 'order-detail'
 
 
+class DeliveryFilter(django_filters.FilterSet):
+    from_time = DateTimeFilter(field_name='time', lookup_expr='gte')
+    to_time = DateTimeFilter(field_name='time', lookup_expr='lte')
+    from_price = CharFilter(field_name='price', lookup_expr='gte')
+    to_price = CharFilter(field_name='price', lookup_expr='lte')
+
+    class Meta:
+        model = Delivery
+        fields = ['from_time', 'to_time', 'from_price', 'to_price', 'type', 'priority']
+
+
 class DeliveryList(generics.ListCreateAPIView):
     queryset = Delivery.objects.all()
     serializer_class = DeliverySerializer
     name = 'delivery-list'
+    ordering_fields = ['price', 'type', 'priority']
+    filterset_class = DeliveryFilter
+    search_fields = ['price', 'type', 'priority']
 
 
 class DeliveryDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -110,10 +135,24 @@ class DeliveryDetail(generics.RetrieveUpdateDestroyAPIView):
     name = 'delivery-detail'
 
 
+class ReviewFilter(django_filters.FilterSet):
+    from_read_date = DateTimeFilter(field_name='read_date', lookup_expr='gte')
+    to_read_date = DateTimeFilter(field_name='read_date', lookup_expr='lte')
+    from_scale_points = CharFilter(field_name='scale_points', lookup_expr='gte')
+    to_scale_points = CharFilter(field_name='scale_points', lookup_expr='lte')
+
+    class Meta:
+        model = Review
+        fields = ['from_read_date', 'to_read_date', 'from_scale_points', 'to_scale_points', 'book', 'client']
+
+
 class ReviewList(generics.ListCreateAPIView):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     name = 'review-list'
+    filterset_class = ReviewFilter
+    ordering_fields = ['book', 'client', 'scale_points']
+    search_fields = ['book', 'client', 'scale_points', 'read_again', 'recommend']
 
 
 class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -122,10 +161,21 @@ class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
     name = 'review-detail'
 
 
+class BookHasOrderFilter(django_filters.FilterSet):
+    book = DateTimeFilter(field_name='book')
+
+    class Meta:
+        model = BookHasOrder
+        fields = ['book']
+
+
 class BookHasOrderList(generics.ListCreateAPIView):
     queryset = BookHasOrder.objects.all()
     serializer_class = BookHasOrderSerializer
     name = 'book-has-order-list'
+    filterset_class = BookHasOrderFilter
+    search_fields = ['book']
+    ordering_fields = ['book']
 
 
 class BookHasOrderDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -144,4 +194,5 @@ class ApiRoot(generics.GenericAPIView):
                          'orders': reverse(OrderList.name, request=request),
                          'deliveries': reverse(DeliveryList.name, request=request),
                          'reviews': reverse(ReviewList.name, request=request),
+                         'books orders': reverse(BookHasOrderList.name, request=request),
                          })
