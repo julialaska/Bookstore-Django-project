@@ -172,8 +172,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class BookHasOrderSerializer(serializers.ModelSerializer):
     book = serializers.SlugRelatedField(queryset=Book.objects.all(), slug_field='title')
-    # TODO: TypeError: Object of type Client is not JSON serializable
-    order = serializers.SlugRelatedField(queryset=Order.objects.all(), slug_field='client')
+    order = serializers.SlugRelatedField(queryset=Order.objects.all(), slug_field='price')
 
     class Meta:
         model = BookHasOrder
