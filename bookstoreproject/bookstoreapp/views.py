@@ -50,6 +50,9 @@ class BookList(generics.ListCreateAPIView):
     ordering_fields = ['title', 'category', 'author', 'price']
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
 
 class BookDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Book.objects.all()
