@@ -46,3 +46,31 @@ class CategoryTests(APITestCase):
         assert response.status_code == status.HTTP_200_OK
         assert response.data['count'] == 1
         assert response.data['results'][0]['name'] == category_name_one
+
+    def test_get_categories_collection(self):
+        new_category_name = 'Anime'
+        self.post_category(new_category_name)
+        url = reverse(views.CategoryList.name)
+        response = self.client.get(url, format='json')
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 1
+        assert response.data['results'][0]['name'] == new_category_name
+
+    def test_update_category(self):
+        category_name = 'IT'
+        response = self.post_category(category_name)
+        url = urls.reverse(views.CategoryDetail.name, None, {response.data['pk']})
+        updated_category_name = 'New IT'
+        data = {'name': updated_category_name}
+        patch_response = self.client.patch(url, data, format='json')
+        assert patch_response.status_code == status.HTTP_200_OK
+        assert patch_response.data['name'] == updated_category_name
+
+    def test_get_category(self):
+        category_name = 'IT'
+        response = self.post_category(category_name)
+        url = urls.reverse(views.CategoryDetail.name, None, {response.data['pk']})
+        get_response = self.client.patch(url, format='json')
+        assert get_response.status_code == status.HTTP_200_OK
+        assert get_response.data['name'] == category_name
+
