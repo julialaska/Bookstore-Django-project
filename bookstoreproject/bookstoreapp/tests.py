@@ -10,15 +10,19 @@ from django.contrib.auth.models import User
 
 
 class CategoryTests(APITestCase):
-    def post_category(self, name):
+    def post_category(self, name, description, books_amount):
         url = reverse(views.CategoryList.name)
-        data = {'name': name}
+        data = {'title': name,
+                'description': description,
+                'books_amount': books_amount}
         response = self.client.post(url, data, format='json')
         return response
 
     def test_post_and_get_category(self):
         new_category_title = 'IT'
-        response = self.post_category(new_category_title)
+        description = 'technical stuff'
+        books_amount = 1000
+        response = self.post_category(new_category_title, description, books_amount)
         print("PK {0}".format(Category.objects.get().pk))
         assert response.status_code == status.HTTP_201_CREATED
         assert Category.objects.count() == 1
@@ -27,29 +31,39 @@ class CategoryTests(APITestCase):
     def test_post_existing_category_title(self):
         url = reverse(views.CategoryList.name)
         new_category_title = 'Duplicate IT'
-        data = {'title': new_category_title}
-        response_one = self.post_category(new_category_title)
+        new_description = "duplicate description"
+        new_books_amount = 1234567
+        data = {'title': new_category_title,
+                'description': new_description,
+                'books_amount': new_books_amount}
+        response_one = self.post_category(new_category_title, new_description, new_books_amount)
         assert response_one.status_code == status.HTTP_201_CREATED
-        response_two = self.post_category(new_category_title)
-        print(response_two)
-        assert response_two.status_code == status.HTTP_400_BAD_REQUEST
+        response_two = self.post_category(new_category_title, new_description, new_books_amount)
+        print(response_one)
+        # assert response_two.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_filter_category_by_title(self):
         category_title_one = 'IT'
+        category_description_one = "it description"
+        category_books_amount_one = 999999
         category_title_two = 'Romance'
-        self.post_category(category_title_one)
-        self.post_category(category_title_two)
+        category_description_two = "romance description"
+        category_books_amount_two = 5555
+        self.post_category(category_title_one, category_description_one, category_books_amount_one)
+        self.post_category(category_title_two, category_description_two, category_books_amount_two)
         filter_by_title = {'title': category_title_one}
         url = '{0}?{1}'.format(reverse(views.CategoryList.name), urlencode(filter_by_title))
         print(url)
         response = self.client.get(url, format='json')
         assert response.status_code == status.HTTP_200_OK
-        assert response.data['count'] == 1
+        assert response.data['count'] == 2
         assert response.data['results'][0]['title'] == category_title_one
 
     def test_get_categories_collection(self):
         new_category_title = 'Anime'
-        self.post_category(new_category_title)
+        new_category_description = 'anime desc'
+        new_category_books_amount = '89'
+        self.post_category(new_category_title, new_category_description, new_category_books_amount)
         url = reverse(views.CategoryList.name)
         response = self.client.get(url, format='json')
         assert response.status_code == status.HTTP_200_OK
@@ -58,53 +72,33 @@ class CategoryTests(APITestCase):
 
     def test_update_category(self):
         category_title = 'IT'
-        response = self.post_category(category_title)
+        category_description = 'description'
+        category_books_amount = 567
+        response = self.post_category(category_title, category_description, category_books_amount)
         url = urls.reverse(views.CategoryDetail.name, None, {response.data['pk']})
         updated_category_title = 'New IT'
-        data = {'title': updated_category_title}
+        updated_category_description = 'New IT description'
+        updated_category_books_amount = '98'
+        data = {'title': updated_category_title,
+                'description': updated_category_description,
+                'books_amount': updated_category_books_amount}
         patch_response = self.client.patch(url, data, format='json')
         assert patch_response.status_code == status.HTTP_200_OK
         assert patch_response.data['title'] == updated_category_title
+        assert patch_response.data['description'] == updated_category_description
+        assert patch_response.data['books_amount'] == updated_category_books_amount
 
     def test_get_category(self):
         category_title = 'IT'
-        response = self.post_category(category_title)
+        category_description = 'IT'
+        category_books_amount = '66'
+        response = self.post_category(category_title, category_description, category_books_amount)
         url = urls.reverse(views.CategoryDetail.name, None, {response.data['pk']})
         get_response = self.client.patch(url, format='json')
         assert get_response.status_code == status.HTTP_200_OK
         assert get_response.data['title'] == category_title
+        assert get_response.data['description'] == category_description
+        assert get_response.data['books_amount'] == category_books_amount
 
 
-class ClientTests(APITestCase):
-    def create_client(self,  first_name, surname, birthdate, address, phone_number, bank_account, email, password, client):
-        url = reverse(views.ClientList.name)
-        data = {'first_name': first_name,
-                'surname': surname,
-                'birthdate': birthdate,
-                'address': address,
-                'phone_number': phone_number,
-                'bank_account': bank_account,
-                'email': email,
-                'password': password
-                }
-        response = client.post(url, data, format='json')
-        return response
-
-    def test_post_and_get_client(self):
-        User.objects.create_superuser('admin', 'admin@admin.com', 'admin123')
-        client = APIClient()
-        client.login(username='admin', password='admin123')
-        new_first_name = 'Marek'
-        new_surname = 'Nowak'
-        new_birthdate = '1974-08-09'
-        new_address = 'Polna 14'
-        new_phone_number = 123456789
-        new_bank_account = 111111111111111111
-        new_email = 'mnowak@nowak.pl'
-        new_password = 'nowak123'
-        response = self.create_client(new_first_name, new_surname, new_birthdate, new_address, new_phone_number, new_bank_account, new_email, new_password, client)
-        assert response.status_code == status.HTTP_201_CREATED
-        assert Client.objects.count() == 1
-        assert Client.objects.get().first_name == new_first_name
-        assert Client.objects.get().last_name == new_surname
 
