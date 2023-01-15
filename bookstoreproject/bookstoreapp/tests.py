@@ -101,4 +101,51 @@ class CategoryTests(APITestCase):
         assert get_response.data['books_amount'] == category_books_amount
 
 
+class BookTests(APITestCase):
+    def create_category(self, client):
+        url = reverse(views.CategoryList.name)
+        data = {'title': 'criminal',
+                'description': 'criminal',
+                'books_amount': 2}
+        client.post(url, data, format='json')
+
+    def post_category(self, name, description, books_amount):
+        url = reverse(views.CategoryList.name)
+        data = {'title': name,
+                'description': description,
+                'books_amount': books_amount}
+        self.client.post(url, data, format='json')
+
+    def create_book(self, category, author, title, price, amount, description, page_amount, owner, client):
+        url = reverse(views.BookList.name)
+        data = {'category': category,
+                'author': author,
+                'title': title,
+                'price': price,
+                'amount': amount,
+                'description': description,
+                'page_amount': page_amount,
+                'owner': owner}
+        response = client.post(url, data, format='json')
+        return response
+
+    def test_post_and_get_book(self):
+        user = User.objects.create_superuser('admin', 'admin@admin.com', 'admin123')
+        client = APIClient()
+        client.login(username='admin', password='admin123')
+        self.create_category(client)
+        new_category = Category.objects.create(title="Test Category", description="Test Description", books_amount="10")
+        new_author = 'Mickiewicz'
+        new_title = 'Pan Tadeusz'
+        new_price = '45'
+        new_amount = '100'
+        new_description = 'powiesc'
+        new_page_amount = '234'
+
+        response = self.create_book(new_category.title, new_author, new_title, new_price, new_amount, new_description, new_page_amount, user.id, client)
+        print(response)
+        assert response.status_code == status.HTTP_201_CREATED
+        assert Book.objects.count() == 1
+        assert Book.objects.get().title == new_title
+        assert Book.objects.get().author == new_author
 
