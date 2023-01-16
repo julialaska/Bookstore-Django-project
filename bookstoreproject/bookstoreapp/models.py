@@ -95,3 +95,5 @@ class Review(models.Model):
     disadvantages = models.CharField(max_length=45)
     recommend = models.BooleanField()
     read_again = models.BooleanField()
+
+
