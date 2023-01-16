@@ -18,5 +18,7 @@ urlpatterns = [
     path('review/<int:pk>', views.ReviewDetail.as_view(), name=views.ReviewDetail.name),
     path('book_has_order', views.BookHasOrderList.as_view(), name=views.BookHasOrderList.name),
     path('book_has_order/<int:pk>', views.BookHasOrderDetail.as_view(), name=views.BookHasOrderDetail.name),
+    path('users/', views.UserList.as_view(), name = views.UserList.name),
+    path('users/<int:pk>/', views.UserDetail.as_view(), name = views.UserDetail.name),
     path('', views.ApiRoot.as_view(), name=views.ApiRoot.name),
 ]

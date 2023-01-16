@@ -1,3 +1,6 @@
+import datetime
+import re
+
 from rest_framework import serializers
 from .models import Order, Book, Category, Client, Delivery, Review, BookHasOrder
 from django.contrib.auth.models import User
@@ -35,7 +38,7 @@ class BookSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Prices can't be lower or equal to zero", )
         return price
 
-    def validate_pages(self, pages):
+    def validate_page_amount(self, pages):
         if pages <= 0:
             raise serializers.ValidationError("Pages can't be lower or equal to zero", )
         return pages
@@ -67,6 +70,20 @@ class ClientSerializer(serializers.ModelSerializer):
     def validate_phone_number(self, value):
         if value != '9':
             raise serializers.ValidationError("Phone number have to consist of 9 digits", )
+        return value
+
+    def validate_birthdate(self, value):
+        if value > datetime.date.today():
+            raise serializers.ValidationError(
+                "Date cannot be later than today.")
+        return value
+
+    def validate_email(self, value):
+        # Regular expression to check for valid email format
+        email_regex = r'^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9._-]+\.[a-zA-Z]+$'
+
+        if not re.match(email_regex, value):
+            raise serializers.ValidationError("Invalid email format.")
         return value
 
     class Meta:
@@ -113,7 +130,6 @@ class DeliverySerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     client = serializers.SlugRelatedField(queryset=Client.objects.all(), slug_field='surname')
     delivery = serializers.SlugRelatedField(queryset=Delivery.objects.all(), slug_field='pk')
-    # book = serializers.SlugRelatedField(queryset=Book.objects.all(), slug_field='title')
     quantity = serializers.CharField(max_length=45)
     price = serializers.CharField(max_length=45)
     address = serializers.CharField(max_length=45)
@@ -129,6 +145,12 @@ class OrderSerializer(serializers.ModelSerializer):
     def validate_phone_number(self, value):
         if int(value) != 9:
             raise serializers.ValidationError("Phone number have to consist of 9 digits", )
+        return value
+
+    def validate_date(self, value):
+        if value > datetime.date.today():
+            raise serializers.ValidationError(
+                "Date cannot be later than today.")
         return value
 
     class Meta:
@@ -195,4 +217,4 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = User
-        fields = ['url', 'pk', 'username', 'book']
+        fields = ['url', 'pk', 'username', 'books']

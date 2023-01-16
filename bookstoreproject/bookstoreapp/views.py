@@ -5,10 +5,11 @@ from rest_framework.reverse import reverse
 from rest_framework.response import Response
 from .models import Book, Category, Client, Order, Delivery, Review, BookHasOrder
 from .serializers import CategorySerializer, BookSerializer, \
-    OrderSerializer, ClientSerializer, DeliverySerializer, ReviewSerializer, BookHasOrderSerializer
+    OrderSerializer, ClientSerializer, DeliverySerializer, ReviewSerializer, BookHasOrderSerializer, UserSerializer
 from django_filters import AllValuesFilter, DateTimeFilter, NumberFilter, FilterSet, CharFilter
 from rest_framework import permissions
 from django.contrib.auth.models import User
+from .custompermission import IsCurrentUserOwnerOrReadOnly
 
 
 def index(request):
@@ -48,7 +49,7 @@ class BookList(generics.ListCreateAPIView):
     filterset_class = BookFilter
     search_fields = ['title', 'author']
     ordering_fields = ['title', 'category', 'author', 'price']
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsCurrentUserOwnerOrReadOnly,)
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -58,7 +59,7 @@ class BookDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     name = 'book-detail'
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsCurrentUserOwnerOrReadOnly,)
 
 
 class ClientFilter(django_filters.FilterSet):
@@ -156,12 +157,14 @@ class ReviewList(generics.ListCreateAPIView):
     filterset_class = ReviewFilter
     ordering_fields = ['book', 'client', 'scale_points']
     search_fields = ['book', 'client', 'scale_points', 'read_again', 'recommend']
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsCurrentUserOwnerOrReadOnly,)
 
 
 class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     name = 'review-detail'
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsCurrentUserOwnerOrReadOnly,)
 
 
 class BookHasOrderFilter(django_filters.FilterSet):
@@ -187,6 +190,22 @@ class BookHasOrderDetail(generics.RetrieveUpdateDestroyAPIView):
     name = 'book-has-order-detail'
 
 
+class UserList(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    name = 'user-list'
+    search_fields = ['books', 'username']
+    ordering_fields = ['books', 'username']
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsCurrentUserOwnerOrReadOnly,)
+
+
+class UserDetail(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    name = 'user-detail'
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsCurrentUserOwnerOrReadOnly,)
+
+
 class ApiRoot(generics.GenericAPIView):
     name = 'api-root'
 
@@ -198,4 +217,5 @@ class ApiRoot(generics.GenericAPIView):
                          'deliveries': reverse(DeliveryList.name, request=request),
                          'reviews': reverse(ReviewList.name, request=request),
                          'books orders': reverse(BookHasOrderList.name, request=request),
+                         'users': reverse(UserList.name, request=request)
                          })
